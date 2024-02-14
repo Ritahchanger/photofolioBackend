@@ -1,0 +1,11 @@
+{
+    "name": "ritahchanger/photofolio-backend",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "authors": [
+        {
+            "name": "Dennis Peter"
+        }
+    ]
+}
