@@ -2,6 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -13,16 +14,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode($json_data, true);
 
     if ($data === null) {
-        
+
         echo json_encode(array("status" => "error", "message" => "Invalid JSON data"));
     } else {
         $connection = create_connection();
 
         if ($connection === false) {
-         
+
             echo json_encode(array("status" => "error", "message" => "Failed to connect to the database"));
         } else {
-            $database = "your_database_name"; 
+            $database = $database;
 
             if (create_database($connection, $database)) {
                 $connection->select_db($database);
@@ -32,25 +33,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     fname VARCHAR(200) NOT NULL,
                     lname VARCHAR(200) NOT NULL,
                     email VARCHAR(200) NOT NULL,
-                    message VARCHAR(200) NOT NULL
+                    message TEXT NOT NULL
                 )";
 
+
                 if ($connection->query($sql_table) === false) {
-                    
+
                     echo json_encode(array("status" => "error", "message" => "Failed to create the table"));
                 } else {
-                   
+
                     $stmt_create_job = $connection->prepare("INSERT INTO jobs (fname, lname, email, message) VALUES (?, ?, ?, ?)");
-                    $stmt_create_job->bind_param("ssss", $fname, $lname, $email, $message);
                     $fname = $data["fname"];
                     $lname = $data["lname"];
                     $email = $data["email"];
                     $message = $data["message"];
+                    $stmt_create_job->bind_param("ssss", $fname, $lname, $email, $message);
+
 
                     if ($stmt_create_job->execute()) {
 
                         try {
-                            require 'vendor/autoload.php';      
+                            require 'vendor/autoload.php';
                             $mail = new PHPMailer(true);
                             $mail->isSMTP();
                             $mail->Host       = 'smtp.gmail.com';
@@ -59,30 +62,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $mail->Password   = 'erux hjgf yton farc';
                             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                             $mail->Port       = 587;
-                            $mail->setFrom($email, $fname . ' ' . $lname); 
+                            $mail->setFrom($email, $fname . ' ' . $lname);
                             $mail->addAddress('peterdennis573@gmail.com');
                             $mail->isHTML(true);
                             $mail->Subject = 'JOB';
                             $mail->Body    = $message;
                             $mail->send();
-                        } catch(Exception $e){
+                        } catch (Exception $e) {
                             http_response_code(500);
                             echo json_encode(array("error" => "Email could not be sent. Mailer Error: " . $mail->ErrorInfo));
                         }
                         echo json_encode(array("status" => "success", "message" => "Data inserted successfully"));
-    
-
                     } else {
-                        
+
                         echo json_encode(array("status" => "error", "message" => "Failed to insert data into the database"));
                     }
                 }
             } else {
                 echo json_encode(array("status" => "error", "message" => "Database not created"));
             }
-    
+
             $connection->close();
         }
     }
 }
-?>
