@@ -54,6 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                         try {
                             require 'vendor/autoload.php';
+                            $sendingemail="dennispeter2580@gmail.com";
                             $mail = new PHPMailer(true);
                             $mail->isSMTP();
                             $mail->Host       = 'smtp.gmail.com';
@@ -62,11 +63,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $mail->Password   = 'erux hjgf yton farc';
                             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                             $mail->Port       = 587;
-                            $mail->setFrom($email, $fname . ' ' . $lname);
+                            $mail->setFrom($sendingemail,$fname . ' ' . $lname);
                             $mail->addAddress('peterdennis573@gmail.com');
                             $mail->isHTML(true);
                             $mail->Subject = 'JOB';
-                            $mail->Body    = $message;
+                            $mail->Body    = "Client Name:{$fname} {$lname} and the email is {$email}: {$message} ";
                             $mail->send();
                         } catch (Exception $e) {
                             http_response_code(500);
